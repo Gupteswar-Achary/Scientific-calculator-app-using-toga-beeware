@@ -2,7 +2,6 @@ import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 import math
-import string
 
 class CalculatorApp(toga.App):
     def startup(self):
@@ -47,17 +46,14 @@ class CalculatorApp(toga.App):
         elif widget.text == 'C':
             self.result.value = ''
         elif widget.text == '=':
-            if "^" in widget.text:
+            if "^" in self.result.value:
                 self.calculate_power()
             else:
                 self.calculate()
         else:
             self.result.value += widget.text
 
-
-
     def open_sci_window(self):
-
         sci_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
         label = toga.Label('Scientific Mode', style=Pack(padding_bottom=10))
@@ -92,7 +88,6 @@ class CalculatorApp(toga.App):
         except Exception:
             self.result.value = "Error"
 
-
     def calculate_power(self):
         try:
             base, exponent = self.result.value.split('^')
@@ -101,9 +96,6 @@ class CalculatorApp(toga.App):
             self.result.value = str(pow(number, power_value))
         except ValueError:
             self.result.value = "Error"
-
-
-
 
 def main():
     return CalculatorApp('Calculator', 'org.beeware.calculator')
