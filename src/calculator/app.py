@@ -7,13 +7,15 @@ import cmath
 
 class CalculatorApp(toga.App):
     def startup(self):
+        # creating the main box
         self.main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
         self.result = toga.TextInput(readonly=True, style=Pack(flex=1, padding_bottom=10))
         self.main_box.add(self.result)
 
         self.button_layout = [
-            ('DEL', '√', '^', 'Sci'),
+            ('AC', 'DEL', 'Tri', 'Equ'),
+            ('√', '^', 'ln', '/'),
             ('1', '2', '3', '+'),
             ('4', '5', '6', '-'),
             ('7', '8', '9', '*'),
@@ -22,16 +24,18 @@ class CalculatorApp(toga.App):
 
         self.create_buttons(self.button_layout, self.main_box)
 
+        # creating the scientific mode UI
         self.scientific_mode_layout = [
-            ('', 'Math', ''),
+            ('Math', 'Tri'),
             ('', 'Cubic', 'Quad', '')
         ]
 
-        self.sci_box = toga.Box(style=Pack(direction=COLUMN, padding=10, flex=1))
-        self.sci_result = toga.TextInput(readonly=True, style=Pack(flex=1, padding_bottom=10))
-        self.sci_box.add(self.sci_result)
-        self.create_buttons(self.scientific_mode_layout, self.sci_box)
+        self.equ_box = toga.Box(style=Pack(direction=COLUMN, padding=10, flex=1))
+        self.equ_result = toga.TextInput(readonly=True, style=Pack(flex=1, padding_bottom=10))
+        self.equ_box.add(self.equ_result)
+        self.create_buttons(self.scientific_mode_layout, self.equ_box)
 
+        # creating ui for the quadratic equations
         self.quadratic_layout = [
             ('a', toga.TextInput(style=Pack(flex=1))),
             ('b', toga.TextInput(style=Pack(flex=1))),
@@ -44,6 +48,7 @@ class CalculatorApp(toga.App):
         self.quad_box.add(self.quad_result)
         self.create_equation_solver_ui(self.quadratic_layout, self.quad_box, self.on_solve_quadratic)
 
+        # creating ui for the cubic equations
         self.cubic_layout = [
             ('a', toga.TextInput(style=Pack(flex=1))),
             ('b', toga.TextInput(style=Pack(flex=1))),
@@ -57,10 +62,29 @@ class CalculatorApp(toga.App):
         self.cubic_box.add(self.cubic_result)
         self.create_equation_solver_ui(self.cubic_layout, self.cubic_box, self.on_solve_cubic)
 
+        # Creating the Trigonometry box UI
+        self.trigonometry_box = toga.Box(style=Pack(direction=COLUMN, padding=10, flex=1))
+        self.tri_result = toga.TextInput(readonly=True, style=Pack(flex=1, padding_bottom=10))
+        self.trigonometry_box.add(self.tri_result)
+
+        self.trigonometry_layout = [
+            ('(', ')', '', ''),
+            ('sin', 'cos', 'tan'),
+            ('cosec', 'sec', 'cot')
+        ]
+
+        # Adding main calculator buttons to the trigonometry box
+        self.create_buttons(self.button_layout, self.trigonometry_box)
+        # Adding trigonometry buttons to the trigonometry box
+        self.create_buttons(self.trigonometry_layout, self.trigonometry_box)
+
+        self.current_box = self.main_box  # Track the currently active box
+
         self.main_window = toga.MainWindow(title=self.formal_name)
         self.main_window.content = self.main_box
         self.main_window.show()
 
+    # Creating the buttons layout of math calculator
     def create_buttons(self, layout, container):
         for row in layout:
             button_box = toga.Box(style=Pack(direction=ROW, padding_bottom=5))
@@ -70,6 +94,7 @@ class CalculatorApp(toga.App):
                     button_box.add(button)
             container.add(button_box)
 
+    # create the button layout of equation mode
     def create_equation_solver_ui(self, layout, container, solve_method):
         for label_text, widget in layout:
             box = toga.Box(style=Pack(direction=ROW, padding_bottom=5))
@@ -84,52 +109,95 @@ class CalculatorApp(toga.App):
         back_button = toga.Button('Math', on_press=self.show_main_calculator, style=Pack(padding=10))
         container.add(back_button)
 
+    # Function to operate on clicks
     def on_button_press(self, widget):
+        if self.current_box == self.trigonometry_box:
+            result_box = self.tri_result
+        else:
+            result_box = self.result
+
         if widget.text == 'DEL':
-            self.result.value = self.result.value[:-1]
+            result_box.value = result_box.value[:-1]
         elif widget.text == '√':
             try:
-                self.result.value = str(math.sqrt(float(self.result.value)))
+                result_box.value = str(math.sqrt(float(result_box.value)))
             except ValueError:
-                self.result.value = "Error"
+                result_box.value = "Error"
         elif widget.text == '^':
-            self.result.value += widget.text
-        elif widget.text == 'Sci':
-            self.main_window.content = self.sci_box
+            result_box.value += widget.text
+        elif widget.text == 'Equ':
+            self.main_window.content = self.equ_box
+            self.current_box = self.equ_box
+        elif widget.text == 'Tri':
+            self.main_window.content = self.trigonometry_box
+            self.current_box = self.trigonometry_box
         elif widget.text == 'Math':
             self.main_window.content = self.main_box
-        elif widget.text == 'C':
-            self.result.value = ''
+            self.current_box = self.main_box
+        elif widget.text == 'AC':
+            result_box.value = ''
         elif widget.text == '=':
-            if "^" in self.result.value:
-                self.calculate_power()
+            if "^" in result_box.value:
+                self.calculate_power(result_box)
+            elif widget.text == 'sin(90)':
+                self.calculate_trigonometry(result_box)
             else:
-                self.calculate()
+                self.calculate(result_box)
         elif widget.text == 'Quad':
             self.main_window.content = self.quad_box
+            self.current_box = self.quad_box
         elif widget.text == 'Cubic':
             self.main_window.content = self.cubic_box
+            self.current_box = self.cubic_box
+        elif widget.text in ['sin', 'cos', 'tan', 'cosec', 'sec', 'cot']:
+            result_box.value += f'{widget.text}('
+        elif widget.text in [')']:
+            result_box.value += widget.text
         else:
-            self.result.value += widget.text
+            result_box.value += widget.text
 
     def show_main_calculator(self, widget):
         self.main_window.content = self.main_box
+        self.current_box = self.main_box
 
-    def calculate(self):
+    # calculate function for simple math functions
+    def calculate(self, result_box):
         try:
-            self.result.value = str(eval(self.result.value))
+            result_box.value = str(eval(result_box.value))
         except Exception:
-            self.result.value = "Error"
+            result_box.value = "Error"
 
-    def calculate_power(self):
+    # function to calculate the power of number
+    def calculate_power(self, result_box):
         try:
-            base, exponent = self.result.value.split('^')
+            base, exponent = result_box.value.split('^')
             number = float(base)
             power_value = float(exponent)
-            self.result.value = str(pow(number, power_value))
+            result_box.value = str(pow(number, power_value))
         except ValueError:
-            self.result.value = "Error"
+            result_box.value = "Error"
 
+    # Function to calculate trigonometric functions
+    def calculate_trigonometry(self, function, result_box):
+        try:
+            value = float(result_box.value)
+            if function == 'sin':
+                result = math.sin(math.radians(value))
+            elif function == 'cos':
+                result = math.cos(math.radians(value))
+            elif function == 'tan':
+                result = math.tan(math.radians(value))
+            elif function == 'cosec':
+                result = 1 / math.sin(math.radians(value))
+            elif function == 'sec':
+                result = 1 / math.cos(math.radians(value))
+            elif function == 'cot':
+                result = 1 / math.tan(math.radians(value))
+            result_box.value = str(result)
+        except ValueError:
+            result_box.value = "Error in tri box"
+
+    # Function to calculate quadratic equations
     def on_solve_quadratic(self, widget):
         try:
             a = float(self.quadratic_layout[0][1].value)
@@ -148,6 +216,7 @@ class CalculatorApp(toga.App):
         except ValueError:
             self.quad_result.value = "Error"
 
+    # function to solve the cubic equations
     def on_solve_cubic(self, widget):
         try:
             a = float(self.cubic_layout[0][1].value)
