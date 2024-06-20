@@ -10,7 +10,7 @@ class CalculatorApp(toga.App):
         # creating the main box
         self.main_box = toga.Box(style=Pack(direction=COLUMN, padding=10))
 
-        self.result = toga.TextInput(readonly=True, style=Pack(flex=1, padding_bottom=10))
+        self.result = toga.TextInput(readonly=False, style=Pack(flex=1, padding_bottom=10))
         self.main_box.add(self.result)
 
         self.button_layout = [
@@ -136,11 +136,11 @@ class CalculatorApp(toga.App):
             self.current_box = self.main_box
         elif widget.text == 'AC':
             result_box.value = ''
+        elif widget.text == 'ln':
+            self.calculate_ln(result_box)
         elif widget.text == '=':
             if "^" in result_box.value:
                 self.calculate_power(result_box)
-            elif widget.text == 'sin(90)':
-                self.calculate_trigonometry(result_box)
             else:
                 self.calculate(result_box)
         elif widget.text == 'Quad':
@@ -174,6 +174,17 @@ class CalculatorApp(toga.App):
             number = float(base)
             power_value = float(exponent)
             result_box.value = str(pow(number, power_value))
+        except ValueError:
+            result_box.value = "Error"
+
+    # function to calculate the natural logarithm
+    def calculate_ln(self, result_box):
+        try:
+            number = float(result_box.value)
+            if number > 0:
+                result_box.value = str(math.log(number))
+            else:
+                result_box.value = "Error"
         except ValueError:
             result_box.value = "Error"
 
