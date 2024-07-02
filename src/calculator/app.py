@@ -19,7 +19,7 @@ class CalculatorApp(toga.App):
             ('1', '2', '3', '+'),
             ('4', '5', '6', '-'),
             ('7', '8', '9', '*'),
-            ('.', '0', 'C', '=')
+            ('.', '0', '00', '=')
         ]
 
         self.create_buttons(self.button_layout, self.main_box)
@@ -68,9 +68,9 @@ class CalculatorApp(toga.App):
         self.trigonometry_box.add(self.tri_result)
 
         self.trigonometry_layout = [
-            ('(', ')', '', ''),
-            ('sin', 'cos', 'tan'),
-            ('cosec', 'sec', 'cot')
+            ('(', ')', '', 'Math'),
+            ('sin', 'cos', 'tan', ''),
+            ('cosec', 'sec', 'cot', '')
         ]
 
         # Adding main calculator buttons to the trigonometry box
@@ -90,7 +90,11 @@ class CalculatorApp(toga.App):
             button_box = toga.Box(style=Pack(direction=ROW, padding_bottom=5))
             for text in row:
                 if text:
-                    button = toga.Button(text, on_press=self.on_button_press, style=Pack(flex=1, padding=5))
+                    bg_color = "#3A4452" if text.isdigit() or text == '.' or text in ['sin', 'cos', 'tan', 'cosec', 'sec', 'cot', '(',')'] else "#6DEE6D"
+                    color = "#FFFFFF" if text.isdigit() or text == '.' or text in ['sin', 'cos', 'tan', 'cosec', 'sec', 'cot', '(',')'] else "#000000"
+                    button = toga.Button(text, on_press=self.on_button_press, style=Pack(flex=1, padding=5, background_color=bg_color, color=color))
+                    if text == '=' or text == 'AC' or text == 'DEL':
+                        button.style.background_color = "#FFA500"
                     button_box.add(button)
             container.add(button_box)
 
@@ -104,9 +108,9 @@ class CalculatorApp(toga.App):
                 box.add(widget)
             container.add(box)
 
-        solve_button = toga.Button('Solve', on_press=solve_method, style=Pack(padding=10))
+        solve_button = toga.Button('Solve', on_press=solve_method, style=Pack(padding=10, background_color="#6DEE6D"))
         container.add(solve_button)
-        back_button = toga.Button('Math', on_press=self.show_main_calculator, style=Pack(padding=10))
+        back_button = toga.Button('Math', on_press=self.show_main_calculator, style=Pack(padding=10, background_color="#6DEE6D"))
         container.add(back_button)
 
     # Function to operate on clicks
@@ -141,6 +145,8 @@ class CalculatorApp(toga.App):
         elif widget.text == '=':
             if "^" in result_box.value:
                 self.calculate_power(result_box)
+            elif any(func in result_box.value for func in ['sin', 'cos', 'tan', 'cosec', 'sec', 'cot']):
+                self.calculate_trigonometry(result_box)
             else:
                 self.calculate(result_box)
         elif widget.text == 'Quad':
@@ -149,10 +155,6 @@ class CalculatorApp(toga.App):
         elif widget.text == 'Cubic':
             self.main_window.content = self.cubic_box
             self.current_box = self.cubic_box
-        elif widget.text in ['sin', 'cos', 'tan', 'cosec', 'sec', 'cot']:
-            result_box.value += f'{widget.text}('
-        elif widget.text in [')']:
-            result_box.value += widget.text
         else:
             result_box.value += widget.text
 
@@ -189,24 +191,27 @@ class CalculatorApp(toga.App):
             result_box.value = "Error"
 
     # Function to calculate trigonometric functions
-    def calculate_trigonometry(self, function, result_box):
+    def calculate_trigonometry(self, result_box):
         try:
-            value = float(result_box.value)
-            if function == 'sin':
-                result = math.sin(math.radians(value))
-            elif function == 'cos':
-                result = math.cos(math.radians(value))
-            elif function == 'tan':
-                result = math.tan(math.radians(value))
-            elif function == 'cosec':
-                result = 1 / math.sin(math.radians(value))
-            elif function == 'sec':
-                result = 1 / math.cos(math.radians(value))
-            elif function == 'cot':
-                result = 1 / math.tan(math.radians(value))
-            result_box.value = str(result)
+            for func in ['sin', 'cos', 'tan', 'cosec', 'sec', 'cot']:
+                if func in result_box.value:
+                    value = float(result_box.value.replace(f'{func}(', '').replace(')', ''))
+                    if func == 'sin':
+                        result = math.sin(math.radians(value))
+                    elif func == 'cos':
+                        result = math.cos(math.radians(value))
+                    elif func == 'tan':
+                        result = math.tan(math.radians(value))
+                    elif func == 'cosec':
+                        result = 1 / math.sin(math.radians(value))
+                    elif func == 'sec':
+                        result = 1 / math.cos(math.radians(value))
+                    elif func == 'cot':
+                        result = 1 / math.tan(math.radians(value))
+                    result_box.value = str(result)
+                    return
         except ValueError:
-            result_box.value = "Error in tri box"
+            result_box.value = "Error"
 
     # Function to calculate quadratic equations
     def on_solve_quadratic(self, widget):
