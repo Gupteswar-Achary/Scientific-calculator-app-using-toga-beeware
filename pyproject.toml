@@ -1,17 +1,28 @@
 # This project was generated with 0.3.18 using template: https://github.com/beeware/briefcase-template@v0.3.18
 [tool.briefcase]
-project_name = "Calculator"
+project_name = "Scientific Calculator"
 bundle = "com.example"
-version = "0.0.1"
+version = "0.1.2"
 url = "https://example.com/calculator"
 license = "BSD license"
 author = "Sovit Achary"
-author_email = "gupteswarachary32@gmail.com"
+author_email = "acharysovit@gmail.com"
 
 [tool.briefcase.app.calculator]
 formal_name = "Calculator"
-description = "This a scientific calculator where you can calcutate simple mathmatic calculations and also calculate the 2nd order and 3rd order equations"
-long_description = """More details about the app should go here.
+description = "This a scientific calculator where you can calcutate simple mathmatic calculations and much more."
+long_description = """
+This calculator app, developed using BeeWare and Toga, offers a versatile tool for performing basic arithmetic calculations, handling quadratic and cubic equations, and exploring trigonometric functions. It features a user-friendly interface with distinct modes for standard calculations, scientific functions, and equation solving.
+
+Key Features:
+- Standard arithmetic operations (addition, subtraction, multiplication, division).
+- Square root, power, and natural logarithm calculations.
+- Solver for quadratic and cubic equations, providing roots and solutions.
+- Trigonometric functions including sine, cosine, tangent, cosecant, secant, and cotangent.
+
+Designed with simplicity and functionality in mind, this app aims to provide a seamless user experience across different platforms, leveraging the power of Python and BeeWare to deliver a responsive and intuitive calculator solution.
+
+Feel free to customize this description further to highlight any specific functionalities or design choices that are unique to your calculator app!
 """
 sources = [
     "src/calculator",
